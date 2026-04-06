@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CrowdGuard: AI Crowd Management Simulation</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="app-layout">
         <aside class="sidebar">
@@ -15,7 +21,7 @@
                 <h1>CrowdGuard</h1>
             </div>
             <p class="brand-subtitle">AI-Driven Crowd Management</p>
-            
+
             <div class="control-panel">
                 <section class="panel-section">
                     <h3>Simulation Transport</h3>
@@ -23,6 +29,9 @@
                         <button id="btnPlay" class="btn btn-primary active">Play</button>
                         <button id="btnPause" class="btn btn-secondary">Pause</button>
                     </div>
+                    <button id="btnToggleEntry" class="btn btn-secondary fluid mt-2">Pause Entry Points</button>
+                    <button id="btnEvacuate" class="btn btn-danger fluid mt-2"
+                        style="background:#e69a9a;">Evacuate</button>
                     <button id="btnClear" class="btn btn-danger fluid mt-2">Clear Agents</button>
                 </section>
 
@@ -39,6 +48,9 @@
                         <button id="toolWashroom" class="btn tool" data-tool="washroom">Washroom</button>
                         <button id="toolRemove" class="btn tool" data-tool="remove">Remove</button>
                     </div>
+                    <button id="btnImportMap" class="btn btn-primary fluid mt-2"
+                        style="background:#10b981;box-shadow:0 4px 12px rgba(16, 185, 129, 0.3);">Open Map
+                        Editor</button>
                     <p class="helper-text mt-2" id="helperText">Click and drag on the canvas to add a spawn zone.</p>
                 </section>
 
@@ -86,6 +98,29 @@
         </main>
     </div>
 
+    <!-- Map Modal Overlay -->
+    <div id="mapModal" class="map-modal hidden">
+        <div class="map-modal-content">
+            <div class="map-header">
+                <h2>Venue Map Importer</h2>
+                <button id="btnCloseMap" class="btn-close">&times;</button>
+            </div>
+            <div class="map-search-bar">
+                <input type="text" id="mapSearchInput" placeholder="Search city or venue...">
+                <button id="btnMapSearch" class="btn btn-secondary">Search</button>
+            </div>
+            <div id="osm-map" class="osm-map-container"></div>
+            <div class="map-footer">
+                <p class="helper-text">Click on the map to drop pins defining the venue boundary.</p>
+                <div class="button-group">
+                    <button id="btnClearMap" class="btn btn-danger">Clear Pins</button>
+                    <button id="btnImportBoundary" class="btn btn-primary">Import to Canvas</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
+
 </html>

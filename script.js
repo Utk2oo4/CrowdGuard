@@ -111,7 +111,7 @@ class Agent {
             steer.sub(this.vel);
             steer.limit(this.maxForce * 1.5);
         }
-        
+
         // Trigger panic based on density and global panic setting
         if (this.localDensity > 8 + Math.random() * 5 - (simEnv.panicLevel / 10)) {
             this.isPanicking = true;
@@ -125,7 +125,7 @@ class Agent {
     avoidWalls(walls) {
         let steer = new Vector2(0, 0);
         let lookAhead = 30; // distance to look ahead
-        
+
         // Simple bounding box avoidance for lines
         for (let wall of walls) {
             // Find closest point on wall segment to agent
@@ -133,10 +133,10 @@ class Agent {
             let agentVec = Vector2.sub(this.pos, wall.start);
             let t = (agentVec.x * lineVec.x + agentVec.y * lineVec.y) / lineVec.magSq();
             t = Math.max(0, Math.min(1, t)); // clamp
-            
+
             let closestPt = new Vector2(wall.start.x + t * lineVec.x, wall.start.y + t * lineVec.y);
             let dist = Vector2.dist(this.pos, closestPt);
-            
+
             if (dist < this.radius + 15) {
                 let diff = Vector2.sub(this.pos, closestPt);
                 diff.normalize();
@@ -151,18 +151,18 @@ class Agent {
 
     avoidObstacles(obstacles) {
         let steer = new Vector2(0, 0);
-        
+
         for (let obs of obstacles) {
             let closestX = constrain(this.pos.x, obs.pos.x, obs.pos.x + obs.w);
             let closestY = constrain(this.pos.y, obs.pos.y, obs.pos.y + obs.h);
-            
+
             let closestPt = new Vector2(closestX, closestY);
             let dist = Vector2.dist(this.pos, closestPt);
-            
+
             if (dist < this.radius + 15) {
                 let diff = Vector2.sub(this.pos, closestPt);
                 if (diff.magSq() === 0) {
-                   diff = new Vector2(Math.random()-0.5, Math.random()-0.5);
+                    diff = new Vector2(Math.random() - 0.5, Math.random() - 0.5);
                 }
                 diff.normalize();
                 diff.mult(this.maxSpeed);
@@ -203,7 +203,7 @@ class Shop {
         this.pos = new Vector2(x, y);
         this.w = w;
         this.h = h;
-        this.center = new Vector2(x + w/2, y + h/2);
+        this.center = new Vector2(x + w / 2, y + h / 2);
     }
     draw(ctx) {
         ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
@@ -211,7 +211,7 @@ class Shop {
         ctx.strokeStyle = '#3b82f6';
         ctx.lineWidth = 2;
         ctx.strokeRect(this.pos.x, this.pos.y, this.w, this.h);
-        
+
         ctx.fillStyle = '#fff';
         ctx.font = '12px Inter';
         ctx.textAlign = 'center';
@@ -225,7 +225,7 @@ class Stage {
         this.pos = new Vector2(x, y);
         this.w = w;
         this.h = h;
-        this.center = new Vector2(x + w/2, y + h/2);
+        this.center = new Vector2(x + w / 2, y + h / 2);
     }
     draw(ctx) {
         ctx.fillStyle = 'rgba(168, 85, 247, 0.2)';
@@ -233,7 +233,7 @@ class Stage {
         ctx.strokeStyle = '#a855f7';
         ctx.lineWidth = 2;
         ctx.strokeRect(this.pos.x, this.pos.y, this.w, this.h);
-        
+
         ctx.fillStyle = '#fff';
         ctx.font = '12px Inter';
         ctx.textAlign = 'center';
@@ -247,7 +247,7 @@ class Washroom {
         this.pos = new Vector2(x, y);
         this.w = w;
         this.h = h;
-        this.center = new Vector2(x + w/2, y + h/2);
+        this.center = new Vector2(x + w / 2, y + h / 2);
     }
     draw(ctx) {
         ctx.fillStyle = 'rgba(20, 184, 166, 0.2)';
@@ -255,7 +255,7 @@ class Washroom {
         ctx.strokeStyle = '#14b8a6';
         ctx.lineWidth = 2;
         ctx.strokeRect(this.pos.x, this.pos.y, this.w, this.h);
-        
+
         ctx.fillStyle = '#fff';
         ctx.font = '12px Inter';
         ctx.textAlign = 'center';
@@ -269,11 +269,11 @@ class Entry {
         this.pos = new Vector2(x, y);
         this.w = w;
         this.h = h;
-        this.center = new Vector2(x + w/2, y + h/2);
+        this.center = new Vector2(x + w / 2, y + h / 2);
         this.spawnTimer = 0;
     }
     update(simEnv) {
-        if (simEnv.isPlaying) {
+        if (simEnv.isPlaying && !simEnv.isEntryPaused) {
             this.spawnTimer++;
             if (this.spawnTimer > 30) {
                 this.spawnTimer = 0;
@@ -289,7 +289,7 @@ class Entry {
         ctx.strokeStyle = '#eab308';
         ctx.lineWidth = 2;
         ctx.strokeRect(this.pos.x, this.pos.y, this.w, this.h);
-        
+
         ctx.fillStyle = '#fff';
         ctx.font = '12px Inter';
         ctx.textAlign = 'center';
@@ -346,10 +346,12 @@ let simEnv = {
     exits: [],
     evacuatedCount: 0,
     isPlaying: true,
+    isEvacuating: false,
+    isEntryPaused: false,
     panicLevel: 0,
     baseMaxSpeed: 2.5,
     showHeatmap: false,
-    
+
     // Tools
     currentTool: 'spawn', // spawn, exit, wall, remove
     isDrawing: false,
@@ -397,8 +399,8 @@ function loop() {
         ctx.strokeStyle = 'rgba(255,255,255,0.03)';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        for(let i = 0; i < canvas.width; i+=50) { ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); }
-        for(let i = 0; i < canvas.height; i+=50) { ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); }
+        for (let i = 0; i < canvas.width; i += 50) { ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); }
+        for (let i = 0; i < canvas.height; i += 50) { ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); }
         ctx.stroke();
 
         simEnv.exits.forEach(e => e.draw(ctx));
@@ -413,7 +415,7 @@ function loop() {
 
         for (let i = simEnv.agents.length - 1; i >= 0; i--) {
             let a = simEnv.agents[i];
-            
+
             // Set dynamic properties
             a.maxSpeed = simEnv.baseMaxSpeed;
 
@@ -429,7 +431,7 @@ function loop() {
             }
 
             // Evacuation check
-            if (closestExit && minDist < closestExit.radius) {
+            if (simEnv.isEvacuating && closestExit && minDist < closestExit.radius) {
                 simEnv.agents.splice(i, 1);
                 simEnv.evacuatedCount++;
                 updateStats();
@@ -443,12 +445,12 @@ function loop() {
             let avoidShops = a.avoidObstacles(simEnv.shops);
             let avoidStages = a.avoidObstacles(simEnv.stages);
             let avoidWashrooms = a.avoidObstacles(simEnv.washrooms);
-            
+
             // Boundaries
-            if (a.pos.x < 0) avoid.add(new Vector2(1,0));
-            if (a.pos.x > canvas.width) avoid.add(new Vector2(-1,0));
-            if (a.pos.y < 0) avoid.add(new Vector2(0,1));
-            if (a.pos.y > canvas.height) avoid.add(new Vector2(0,-1));
+            if (a.pos.x < 0) avoid.add(new Vector2(1, 0));
+            if (a.pos.x > canvas.width) avoid.add(new Vector2(-1, 0));
+            if (a.pos.y < 0) avoid.add(new Vector2(0, 1));
+            if (a.pos.y > canvas.height) avoid.add(new Vector2(0, -1));
 
             // Weight behaviors
             sep.mult(1.5);
@@ -457,7 +459,7 @@ function loop() {
             avoidShops.mult(1.5);
             avoidStages.mult(2.5);
             avoidWashrooms.mult(2.0);
-            
+
             a.applyForce(sep);
             a.applyForce(avoid);
             a.applyForce(avoidObs);
@@ -465,17 +467,23 @@ function loop() {
             a.applyForce(avoidStages);
             a.applyForce(avoidWashrooms);
 
-            if (closestExit) {
+            if (simEnv.isEvacuating && closestExit) {
                 let seek = a.seek(closestExit.pos);
                 seek.mult(1.0);
                 a.applyForce(seek);
+            } else if (!simEnv.isEvacuating) {
+                // Gentle wander when not evacuating
+                let wander = new Vector2(Math.random() - 0.5, Math.random() - 0.5);
+                wander.normalize();
+                wander.mult(a.maxForce * 0.4);
+                a.applyForce(wander);
             }
 
             a.update();
             a.draw(ctx);
 
             if (simEnv.showHeatmap) {
-                heatMapData.push({x: a.pos.x, y: a.pos.y});
+                heatMapData.push({ x: a.pos.x, y: a.pos.y });
             }
         }
 
@@ -488,7 +496,7 @@ function loop() {
                 rad.addColorStop(1, 'rgba(239, 68, 68, 0)');
                 ctx.fillStyle = rad;
                 ctx.beginPath();
-                ctx.arc(point.x, point.y, 40, 0, Math.PI*2);
+                ctx.arc(point.x, point.y, 40, 0, Math.PI * 2);
                 ctx.fill();
             }
             ctx.globalCompositeOperation = 'source-over';
@@ -587,51 +595,51 @@ canvas.addEventListener('mousedown', (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     if (simEnv.currentTool === 'remove') {
         // Try removing exits
         let exitIndex = simEnv.exits.findIndex(ex => Vector2.dist(ex.pos, new Vector2(x, y)) < ex.radius);
         if (exitIndex > -1) { simEnv.exits.splice(exitIndex, 1); return; }
-        
+
         // Try removing walls
         let m = new Vector2(x, y);
         let wallIndex = simEnv.walls.findIndex(w => {
-           let lineVec = Vector2.sub(w.end, w.start);
-           let agentVec = Vector2.sub(m, w.start);
-           let t = (agentVec.x * lineVec.x + agentVec.y * lineVec.y) / lineVec.magSq();
-           if(t < 0 || t > 1) return false;
-           let proj = new Vector2(w.start.x + t * lineVec.x, w.start.y + t * lineVec.y);
-           return Vector2.dist(m, proj) < 10;
+            let lineVec = Vector2.sub(w.end, w.start);
+            let agentVec = Vector2.sub(m, w.start);
+            let t = (agentVec.x * lineVec.x + agentVec.y * lineVec.y) / lineVec.magSq();
+            if (t < 0 || t > 1) return false;
+            let proj = new Vector2(w.start.x + t * lineVec.x, w.start.y + t * lineVec.y);
+            return Vector2.dist(m, proj) < 10;
         });
         if (wallIndex > -1) { simEnv.walls.splice(wallIndex, 1); return; }
-        
+
         // Try removing obstacles
-        let obsIndex = simEnv.obstacles.findIndex(obs => 
+        let obsIndex = simEnv.obstacles.findIndex(obs =>
             x >= obs.pos.x && x <= obs.pos.x + obs.w && y >= obs.pos.y && y <= obs.pos.y + obs.h
         );
         if (obsIndex > -1) { simEnv.obstacles.splice(obsIndex, 1); return; }
 
         // Try removing shops
-        let shopIndex = simEnv.shops.findIndex(s => 
+        let shopIndex = simEnv.shops.findIndex(s =>
             x >= s.pos.x && x <= s.pos.x + s.w && y >= s.pos.y && y <= s.pos.y + s.h
         );
         if (shopIndex > -1) { simEnv.shops.splice(shopIndex, 1); return; }
 
-        let stageIndex = simEnv.stages.findIndex(s => 
+        let stageIndex = simEnv.stages.findIndex(s =>
             x >= s.pos.x && x <= s.pos.x + s.w && y >= s.pos.y && y <= s.pos.y + s.h
         );
         if (stageIndex > -1) { simEnv.stages.splice(stageIndex, 1); return; }
 
-        let washroomIndex = simEnv.washrooms.findIndex(s => 
+        let washroomIndex = simEnv.washrooms.findIndex(s =>
             x >= s.pos.x && x <= s.pos.x + s.w && y >= s.pos.y && y <= s.pos.y + s.h
         );
         if (washroomIndex > -1) { simEnv.washrooms.splice(washroomIndex, 1); return; }
 
-        let entryIndex = simEnv.entries.findIndex(s => 
+        let entryIndex = simEnv.entries.findIndex(s =>
             x >= s.pos.x && x <= s.pos.x + s.w && y >= s.pos.y && y <= s.pos.y + s.h
         );
         if (entryIndex > -1) { simEnv.entries.splice(entryIndex, 1); return; }
-        
+
     } else {
         simEnv.isDrawing = true;
         simEnv.drawStart = new Vector2(x, y);
@@ -649,11 +657,11 @@ canvas.addEventListener('mousemove', (e) => {
 canvas.addEventListener('mouseup', (e) => {
     if (!simEnv.isDrawing) return;
     simEnv.isDrawing = false;
-    
+
     const rect = canvas.getBoundingClientRect();
     const endX = e.clientX - rect.left;
     const endY = e.clientY - rect.top;
-    
+
     if (simEnv.currentTool === 'spawn') {
         let width = Math.abs(endX - simEnv.drawStart.x);
         let height = Math.abs(endY - simEnv.drawStart.y);
@@ -670,7 +678,7 @@ canvas.addEventListener('mouseup', (e) => {
         let height = Math.abs(endY - simEnv.drawStart.y);
         let x = Math.min(simEnv.drawStart.x, endX);
         let y = Math.min(simEnv.drawStart.y, endY);
-        
+
         if (width > 5 && height > 5) {
             if (simEnv.currentTool === 'square') {
                 simEnv.obstacles.push(new Obstacle(x, y, width, height));
@@ -710,8 +718,45 @@ document.getElementById('btnPause').addEventListener('click', (e) => {
 document.getElementById('btnClear').addEventListener('click', () => {
     simEnv.agents = [];
     simEnv.evacuatedCount = 0;
+    simEnv.isEvacuating = false;
+    let btnEvacuate = document.getElementById('btnEvacuate');
+    btnEvacuate.innerText = "Evacuate";
+    if (btnEvacuate.classList.contains('btn-primary')) {
+        btnEvacuate.classList.replace('btn-primary', 'btn-danger');
+        btnEvacuate.style.background = '#ef4444';
+    }
     updateStats();
     showNotification('All agents cleared.');
+});
+
+document.getElementById('btnEvacuate').addEventListener('click', (e) => {
+    simEnv.isEvacuating = !simEnv.isEvacuating;
+    let btn = e.target;
+    if (simEnv.isEvacuating) {
+        btn.innerText = "Cancel Evacuation";
+        btn.classList.replace('btn-danger', 'btn-primary');
+        btn.style.background = '';
+        showNotification('Evacuation initiated!');
+    } else {
+        btn.innerText = "Evacuate";
+        btn.classList.replace('btn-primary', 'btn-danger');
+        btn.style.background = '#ef4444';
+        showNotification('Evacuation cancelled.');
+    }
+});
+
+document.getElementById('btnToggleEntry').addEventListener('click', (e) => {
+    simEnv.isEntryPaused = !simEnv.isEntryPaused;
+    let btn = e.target;
+    if (simEnv.isEntryPaused) {
+        btn.innerText = "Resume Entry Points";
+        btn.classList.replace('btn-secondary', 'btn-primary');
+        showNotification('Entry points paused.');
+    } else {
+        btn.innerText = "Pause Entry Points";
+        btn.classList.replace('btn-primary', 'btn-secondary');
+        showNotification('Entry points resumed.');
+    }
 });
 
 // Settings
@@ -732,6 +777,129 @@ panicSlider.addEventListener('input', (e) => {
 const heatmapToggle = document.getElementById('heatmapToggle');
 heatmapToggle.addEventListener('change', (e) => {
     simEnv.showHeatmap = e.target.checked;
+});
+
+// --- OpenStreetMap Integration ---
+const btnImportMap = document.getElementById('btnImportMap');
+const mapModal = document.getElementById('mapModal');
+const btnCloseMap = document.getElementById('btnCloseMap');
+const mapSearchInput = document.getElementById('mapSearchInput');
+const btnMapSearch = document.getElementById('btnMapSearch');
+const btnClearMap = document.getElementById('btnClearMap');
+const btnImportBoundary = document.getElementById('btnImportBoundary');
+
+let osmMap = null;
+let venuePoints = [];
+let venuePolygon = null;
+let venueMarkers = [];
+
+function initOsmMap() {
+    if (osmMap) {
+        osmMap.invalidateSize();
+        return;
+    }
+    osmMap = L.map('osm-map').setView([51.505, -0.09], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(osmMap);
+
+    osmMap.on('click', (e) => {
+        let latlng = e.latlng;
+        venuePoints.push(latlng);
+        let marker = L.circleMarker(latlng, { radius: 5, color: '#ef4444', fillOpacity: 1 }).addTo(osmMap);
+        venueMarkers.push(marker);
+
+        if (venuePolygon) {
+            osmMap.removeLayer(venuePolygon);
+        }
+        if (venuePoints.length > 1) {
+            // Automatically close the polygon back to the first point visually
+            venuePolygon = L.polygon([...venuePoints, venuePoints[0]], { color: '#3b82f6', fillOpacity: 0.2 }).addTo(osmMap);
+        }
+    });
+}
+
+btnImportMap.addEventListener('click', () => {
+    mapModal.classList.remove('hidden');
+    setTimeout(initOsmMap, 100);
+});
+
+btnCloseMap.addEventListener('click', () => {
+    mapModal.classList.add('hidden');
+});
+
+btnMapSearch.addEventListener('click', async () => {
+    let query = mapSearchInput.value;
+    if (!query) return;
+    try {
+        let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        let data = await res.json();
+        if (data && data.length > 0) {
+            let item = data[0];
+            osmMap.flyTo([item.lat, item.lon], 16);
+            mapSearchInput.value = '';
+        } else {
+            alert('Location not found');
+        }
+    } catch (e) {
+        alert('Error searching for location');
+    }
+});
+
+btnClearMap.addEventListener('click', () => {
+    venuePoints = [];
+    venueMarkers.forEach(m => osmMap.removeLayer(m));
+    venueMarkers = [];
+    if (venuePolygon) osmMap.removeLayer(venuePolygon);
+    venuePolygon = null;
+});
+
+btnImportBoundary.addEventListener('click', () => {
+    if (venuePoints.length < 3) {
+        alert('Please drop at least 3 pins to form a venue boundary.');
+        return;
+    }
+
+    // Project geographic coordinates to web mercator pixels at fixed zoom
+    let projectedPoints = venuePoints.map(latlng => osmMap.project(latlng, 18));
+
+    // Find geographical bounding box in projected space
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    projectedPoints.forEach(p => {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+    });
+
+    let w = maxX - minX;
+    let h = maxY - minY;
+    let centerX = minX + w / 2;
+    let centerY = minY + h / 2;
+
+    // Fit boundary inside a safe margin of the canvas (80%)
+    let targetW = canvas.width * 0.8;
+    let targetH = canvas.height * 0.8;
+    let scale = Math.min(targetW / w, targetH / h);
+
+    // Transform coordinates
+    let canvasPoints = projectedPoints.map(p => {
+        return new Vector2(
+            canvas.width / 2 + (p.x - centerX) * scale,
+            canvas.height / 2 + (p.y - centerY) * scale
+        );
+    });
+
+    // Create walls from continuous loop
+    for (let i = 0; i < canvasPoints.length; i++) {
+        let p1 = canvasPoints[i];
+        let p2 = canvasPoints[(i + 1) % canvasPoints.length];
+        simEnv.walls.push(new Wall(p1.x, p1.y, p2.x, p2.y));
+    }
+
+    showNotification('Map boundary generated on canvas!');
+    mapModal.classList.add('hidden');
 });
 
 // Start simulation

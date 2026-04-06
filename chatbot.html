@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrowdGuard — AI Chatbot Assistant</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Markdown parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- ═══════════════════════════════ TOP NAVBAR ═══════════════════════════════ -->
+    <nav id="top-nav" style="display:flex; height:45px; background:var(--surface2); border-bottom:1px solid var(--border); align-items:center; padding:0 20px; font-family:'Syne',sans-serif; flex-shrink:0;">
+      <div style="font-weight:800; color:var(--text); font-size:1.1rem; margin-right:30px; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
+        <span style="color:var(--accent)">⬡</span> CrowdGuard System
+      </div>
+      <div style="display:flex; gap:20px; height:100%;">
+        <a href="index.html" style="display:flex; align-items:center; color:var(--dim); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid transparent; font-weight:600;"
+           onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">
+          <span style="margin-right:6px">⚙️</span> Simulation Engine
+        </a>
+        <a href="chatbot.html" style="display:flex; align-items:center; color:var(--accent); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid var(--accent); font-weight:700;">
+          <span style="margin-right:6px">🤖</span> AI Chatbot Assistant
+        </a>
+        <a href="pricing.html" style="display:flex; align-items:center; color:var(--dim); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid transparent; font-weight:600;"
+           onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">
+          <span style="margin-right:6px">💳</span> Pricing
+        </a>
+      </div>
+      <div class="tb-right" style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+        <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light / dark mode">
+          <span class="tt-icon" id="theme-icon">🌙</span>
+          <span id="theme-label">Light</span>
+        </button>
+        <button id="clear-chat-btn" class="sm-btn danger" style="margin:0; width:auto; padding:5px 12px; border-radius:12px; font-weight:600; cursor:pointer;" onclick="clearChatHistory()">🗑 Clear Chat</button>
+      </div>
+    </nav>
+
+    <!-- ═══════════════════════════════ MAIN VIEW ═══════════════════════════════ -->
+    <div id="chat-wrapper">
+      
+      <!-- CHAT INTERFACE -->
+      <div id="chat-main">
+        <div id="chat-messages">
+          <!-- Populated by JS -->
+        </div>
+
+        <div id="chat-input-area">
+          <!-- Suggested Questions -->
+          <div class="suggestion-container">
+            <button class="suggestion-chip" onclick="suggestQuery('What is CrowdGuard AI?')">What is CrowdGuard AI?</button>
+            <button class="suggestion-chip" onclick="suggestQuery('How do I analyze evacuation bottlenecks?')">How do I analyze bottlenecks?</button>
+            <button class="suggestion-chip" onclick="suggestQuery('What are the key crowd safety protocols?')">Safety Protocols</button>
+          </div>
+
+          <!-- Protocol Switcher -->
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+            <div class="protocol-label">SYSTEM PROTOCOL</div>
+            <div style="display: flex; gap: 4px; background: var(--surface); padding: 4px; border-radius: 8px; border: 1px solid var(--border); width: fit-content;">
+              <button type="button" id="btn-mode-rag" onclick="setChatMode('rag')" style="padding: 6px 16px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; transition: all 0.2s;" class="mode-btn">RAG MODE</button>
+              <button type="button" id="btn-mode-normal" onclick="setChatMode('normal')" style="padding: 6px 16px; border: none; border-radius: 6px; cursor: pointer; font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; transition: all 0.2s;" class="mode-btn active">NORMAL MODE</button>
+            </div>
+            <input type="hidden" id="mode-select" value="normal">
+          </div>
+
+          <form id="chat-form">
+            <input type="text" id="chat-input" placeholder="Ask a question or select a suggestion..." autocomplete="off">
+            <button type="submit" class="send-btn" id="send-btn">↑</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- jsPDF — client-side PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="js/chatbot.js"></script>
+
+  <script>
+    // ── Theme toggle ─────────────────────────────────────────────
+    (function () {
+      // Restore saved preference on load
+      const saved = localStorage.getItem('cg-theme') || 'dark';
+      if (saved === 'light') applyLight();
+  
+      function applyLight() {
+        document.documentElement.setAttribute('data-theme', 'light');
+        const icon = document.getElementById('theme-icon');
+        const label = document.getElementById('theme-label');
+        if (icon) icon.textContent  = '☀️';
+        if (label) label.textContent = 'Dark';
+      }
+      function applyDark() {
+        document.documentElement.removeAttribute('data-theme');
+        const icon = document.getElementById('theme-icon');
+        const label = document.getElementById('theme-label');
+        if (icon) icon.textContent  = '🌙';
+        if (label) label.textContent = 'Light';
+      }
+  
+      window.toggleTheme = function () {
+        const isLight = document.documentElement.hasAttribute('data-theme');
+        if (isLight) { applyDark();  localStorage.setItem('cg-theme', 'dark'); }
+        else         { applyLight(); localStorage.setItem('cg-theme', 'light'); }
+      };
+    })();
+  </script>
+</body>
+</html>

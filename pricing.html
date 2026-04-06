@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrowdGuard — Pricing & Plans</title>
+
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/pricing.css">
+</head>
+
+<body>
+  <div id="app">
+
+    
+    <nav id="top-nav"
+      style="display:flex; height:45px; background:var(--surface2); border-bottom:1px solid var(--border); align-items:center; padding:0 20px; font-family:'Syne',sans-serif; flex-shrink:0;">
+      <div
+        style="font-weight:800; color:var(--text); font-size:1.1rem; margin-right:30px; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
+        <span style="color:var(--accent)">⬡</span> CrowdGuard System
+      </div>
+      <div style="display:flex; gap:20px; height:100%;">
+        <a href="index.html"
+          style="display:flex; align-items:center; color:var(--dim); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid transparent; font-weight:600;"
+          onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">
+          <span style="margin-right:6px">⚙️</span> Simulation Engine
+        </a>
+        <a href="pricing.html"
+          style="display:flex; align-items:center; color:var(--accent); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid var(--accent); font-weight:700;">
+          <span style="margin-right:6px">💎</span> Pricing & Plans
+        </a>
+        <a href="chatbot.html"
+          style="display:flex; align-items:center; color:var(--dim); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid transparent; font-weight:600;"
+          onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">
+          <span style="margin-right:6px">🤖</span> AI Assistant
+        </a>
+      </div>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+        <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light / dark mode">
+          <span class="tt-icon" id="theme-icon">🌙</span>
+          <span id="theme-label">Light</span>
+        </button>
+      </div>
+    </nav>
+
+    <div style="overflow-y:auto; flex:1; background:var(--bg);">
+      <div class="pricing-container">
+
+        <div class="pricing-header">
+          <h1>Choose Your Safety Scale</h1>
+          <p>Flexible plans for organizers, venues, and city infrastructure.</p>
+        </div>
+
+        <div class="pricing-grid">
+
+          <!-- Starter Pack -->
+          <div class="pricing-card">
+            <h2 class="card-title">Starter</h2>
+            <div class="card-price">₹9,999<span>/mo</span></div>
+            <p class="card-desc">Perfect for small local festivals and community event planning.</p>
+            <ul class="feature-list">
+              <li class="feature-item"><i>✓</i> Basic Map Editor</li>
+              <li class="feature-item"><i>✓</i> 1 Venue Preset</li>
+              <li class="feature-item"><i>✓</i> Up to 500 Agents</li>
+              <li class="feature-item"><i>✓</i> Basic Density View</li>
+            </ul>
+            <button class="subscribe-btn">Get Started</button>
+          </div>
+
+          <!-- Professional Pack -->
+          <div class="pricing-card featured">
+            <h2 class="card-title">Professional</h2>
+            <div class="card-price">₹24,999<span>/mo</span></div>
+            <p class="card-desc">Advanced features for professional planners and mid-sized venues.</p>
+            <ul class="feature-list">
+              <li class="feature-item"><i>✓</i> Full Heatmap Analysis</li>
+              <li class="feature-item"><i>✓</i> CSV/JSON Data Export</li>
+              <li class="feature-item"><i>✓</i> All Venue Presets</li>
+              <li class="feature-item"><i>✓</i> AI Assistant (Limited)</li>
+              <li class="feature-item"><i>✓</i> Custom Boundaries</li>
+            </ul>
+            <button class="subscribe-btn">Upgrade to Pro</button>
+          </div>
+
+          <!-- Enterprise Pack -->
+          <div class="pricing-card">
+            <h2 class="card-title">Enterprise</h2>
+            <div class="card-price">₹49,999<span>/mo</span></div>
+            <p class="card-desc">Complete crowd safety infrastructure for stadiums and city councils.</p>
+            <ul class="feature-list">
+              <li class="feature-item"><i>✓</i> Unlimited Agents</li>
+              <li class="feature-item"><i>✓</i> Custom Venue Presets</li>
+              <li class="feature-item"><i>✓</i> Full AI Safety Analysis</li>
+              <li class="feature-item"><i>✓</i> CAD / SVG Import</li>
+              <li class="feature-item"><i>✓</i> Priority Support</li>
+            </ul>
+            <button class="subscribe-btn">Upgrade to Enterprise</button>
+          </div>
+
+        </div>
+
+        <div
+          style="margin-top:80px; padding:40px; border-top:1px solid var(--border); color:var(--dim); font-size:0.8rem;">
+          <p>&copy; 2026 CrowdGuard Systems. All rights reserved.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Theme toggle ─────────────────────────────────────────────
+    (function () {
+      const saved = localStorage.getItem('cg-theme') || 'dark';
+      if (saved === 'light') applyLight();
+
+      function applyLight() {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.getElementById('theme-icon').textContent = '☀️';
+        document.getElementById('theme-label').textContent = 'Dark';
+      }
+      function applyDark() {
+        document.documentElement.removeAttribute('data-theme');
+        document.getElementById('theme-icon').textContent = '🌙';
+        document.getElementById('theme-label').textContent = 'Light';
+      }
+
+      window.toggleTheme = function () {
+        const isLight = document.documentElement.hasAttribute('data-theme');
+        if (isLight) { applyDark(); localStorage.setItem('cg-theme', 'dark'); }
+        else { applyLight(); localStorage.setItem('cg-theme', 'light'); }
+      };
+    })();
+  </script>
+</body>
+
+</html>

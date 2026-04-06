@@ -1,0 +1,165 @@
+/* ============================================================
+   PRICING PAGE STYLES
+   ============================================================ */
+
+.pricing-container {
+  max-width: 1100px;
+  margin: 60px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.pricing-header {
+  margin-bottom: 50px;
+  animation: timelineFadeIn 0.6s ease-out;
+}
+
+.pricing-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: var(--text);
+  letter-spacing: -1px;
+}
+
+.pricing-header p {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--dim);
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  perspective: 1000px;
+}
+
+.pricing-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: timelineFadeIn 0.8s ease-out both;
+}
+
+.pricing-card:nth-child(2) { animation-delay: 0.1s; }
+.pricing-card:nth-child(3) { animation-delay: 0.2s; }
+
+.pricing-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--accent);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.pricing-card.featured {
+  border: 2px solid var(--accent);
+  background: linear-gradient(180deg, var(--surface) 0%, rgba(59, 130, 246, 0.03) 100%);
+}
+
+.pricing-card .badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: var(--text);
+}
+
+.card-price {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: var(--accent-h);
+  display: flex;
+  align-items: baseline;
+}
+
+.card-price span {
+  font-size: 1rem;
+  color: var(--dim);
+  font-weight: 400;
+  margin-left: 5px;
+}
+
+.card-desc {
+  font-size: 0.85rem;
+  color: var(--dim);
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 40px;
+  flex: 1;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 15px;
+}
+
+.feature-item i {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.subscribe-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-family: 'DM Mono', monospace;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.subscribe-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.featured .subscribe-btn {
+  background: var(--accent);
+  color: #fff;
+}
+
+.featured .subscribe-btn:hover {
+  background: var(--accent-h);
+  border-color: var(--accent-h);
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+}

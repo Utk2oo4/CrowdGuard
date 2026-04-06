@@ -275,7 +275,8 @@ class Entry {
     update(simEnv) {
         if (simEnv.isPlaying && !simEnv.isEntryPaused) {
             this.spawnTimer++;
-            if (this.spawnTimer > 30) {
+            let framesPerSpawn = 3600 / Math.max(1, simEnv.spawnRatePerMinute);
+            if (this.spawnTimer >= framesPerSpawn) {
                 this.spawnTimer = 0;
                 let ax = this.pos.x + Math.random() * this.w;
                 let ay = this.pos.y + Math.random() * this.h;
@@ -348,6 +349,7 @@ let simEnv = {
     isPlaying: true,
     isEvacuating: false,
     isEntryPaused: false,
+    spawnRatePerMinute: 120,
     panicLevel: 0,
     baseMaxSpeed: 2.5,
     showHeatmap: false,
@@ -760,6 +762,13 @@ document.getElementById('btnToggleEntry').addEventListener('click', (e) => {
 });
 
 // Settings
+const spawnRateSlider = document.getElementById('spawnRateSlider');
+const spawnRateVal = document.getElementById('spawnRateVal');
+spawnRateSlider.addEventListener('input', (e) => {
+    simEnv.spawnRatePerMinute = parseInt(e.target.value);
+    spawnRateVal.innerText = simEnv.spawnRatePerMinute;
+});
+
 const speedSlider = document.getElementById('speedSlider');
 const speedVal = document.getElementById('speedVal');
 speedSlider.addEventListener('input', (e) => {

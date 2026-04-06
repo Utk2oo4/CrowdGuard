@@ -2,125 +2,658 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrowdGuard: AI Crowd Management Simulation</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrowdGuard — Pre-Event Crowd Simulation</title>
+
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
+  <!-- App styles (single source of truth) -->
+  <link rel="stylesheet" href="css/styles.css">
+
 </head>
 
 <body>
-    <div class="app-layout">
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-icon"></div>
-                <h1>CrowdGuard</h1>
-            </div>
-            <p class="brand-subtitle">AI-Driven Crowd Management</p>
+  <div id="app">
 
-            <div class="control-panel">
-                <section class="panel-section">
-                    <h3>Simulation Transport</h3>
-                    <div class="button-group">
-                        <button id="btnPlay" class="btn btn-primary active">Play</button>
-                        <button id="btnPause" class="btn btn-secondary">Pause</button>
-                    </div>
-                    <button id="btnToggleEntry" class="btn btn-secondary fluid mt-2">Pause Entry Points</button>
-                    <button id="btnEvacuate" class="btn btn-danger fluid mt-2"
-                        style="background:#e69a9a;">Evacuate</button>
-                    <button id="btnClear" class="btn btn-danger fluid mt-2">Clear Agents</button>
-                </section>
+    <!-- ═══════════════════════════════ TOP NAVBAR ═══════════════════════════════ -->
+    <nav id="top-nav" style="display:flex; height:45px; background:var(--surface2); border-bottom:1px solid var(--border); align-items:center; padding:0 20px; font-family:'Syne',sans-serif; flex-shrink:0;">
+      <div style="font-weight:800; color:var(--text); font-size:1.1rem; margin-right:30px; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
+        <span style="color:var(--accent)">⬡</span> CrowdGuard System
+      </div>
+      <div style="display:flex; gap:20px; height:100%;">
+        <a href="index.html" style="display:flex; align-items:center; color:var(--accent); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid var(--accent); font-weight:700;">
+          <span style="margin-right:6px">⚙️</span> Simulation Engine
+        </a>
+        <a href="chatbot.html" style="display:flex; align-items:center; color:var(--dim); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid transparent; font-weight:600;" 
+           onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">
+          <span style="margin-right:6px">🤖</span> AI Chatbot Assistant
+        </a>
+        <a href="pricing.html" style="display:flex; align-items:center; color:var(--dim); text-decoration:none; font-size:0.85rem; padding:0 5px; border-bottom:2px solid transparent; font-weight:600;" 
+           onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">
+          <span style="margin-right:6px">💳</span> Pricing
+        </a>
+      </div>
+    </nav>
 
-                <section class="panel-section border-top">
-                    <h3>Environment Toolkit</h3>
-                    <div class="tool-grid">
-                        <button id="toolSpawn" class="btn tool active" data-tool="spawn">Spawn Area</button>
-                        <button id="toolEntry" class="btn tool" data-tool="entry">Entry Gate</button>
-                        <button id="toolExit" class="btn tool" data-tool="exit">Exit Point</button>
-                        <button id="toolWall" class="btn tool" data-tool="wall">Build Wall</button>
-                        <button id="toolSquare" class="btn tool" data-tool="square">Build Square</button>
-                        <button id="toolShop" class="btn tool" data-tool="shop">Build Shop</button>
-                        <button id="toolStage" class="btn tool" data-tool="stage">Build Stage</button>
-                        <button id="toolWashroom" class="btn tool" data-tool="washroom">Washroom</button>
-                        <button id="toolRemove" class="btn tool" data-tool="remove">Remove</button>
-                    </div>
-                    <button id="btnImportMap" class="btn btn-primary fluid mt-2"
-                        style="background:#10b981;box-shadow:0 4px 12px rgba(16, 185, 129, 0.3);">Open Map
-                        Editor</button>
-                    <p class="helper-text mt-2" id="helperText">Click and drag on the canvas to add a spawn zone.</p>
-                </section>
-
-                <section class="panel-section border-top">
-                    <h3>Global Settings</h3>
-                    <div class="slider-group">
-                        <label for="speedSlider">Agent Max Speed <span class="value" id="speedVal">2.5</span></label>
-                        <input type="range" id="speedSlider" min="1" max="5" value="2.5" step="0.1">
-                    </div>
-                    <div class="slider-group">
-                        <label for="panicSlider">Panic Inducement <span class="value" id="panicVal">0%</span></label>
-                        <input type="range" id="panicSlider" min="0" max="100" value="0">
-                    </div>
-                    <div class="toggle-group mt-2">
-                        <label class="switch">
-                            <input type="checkbox" id="heatmapToggle">
-                            <span class="slider round"></span>
-                        </label>
-                        <span>Show Density Heatmap</span>
-                    </div>
-                </section>
-            </div>
-
-            <div class="stats-panel">
-                <h3>Telemetry</h3>
-                <div class="stat-card">
-                    <div class="stat-label">Active Agents</div>
-                    <div class="stat-value" id="statActive">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Evacuated</div>
-                    <div class="stat-value text-success" id="statEvacuated">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Stampede Risk</div>
-                    <div class="stat-value text-safe" id="statRisk">LOW</div>
-                </div>
-            </div>
-        </aside>
-
-        <main class="canvas-container">
-            <canvas id="simCanvas"></canvas>
-            <!-- Overlay for notifications -->
-            <div id="notification-area"></div>
-        </main>
+    <!-- ═══════════════════════════════ TOOLBAR ═══════════════════════════════ -->
+    <div id="toolbar">
+      <div class="logo">CrowdGuard <span>v2.0</span></div>
+      <div class="tb-sep"></div>
+      <button class="mode-tab active" id="tab-edit" onclick="setMode('edit')">✏️ Map Editor</button>
+      <button class="mode-tab" id="tab-sim" onclick="setMode('sim')">▶ Simulation</button>
+      <div class="tb-sep"></div>
+      <!-- Phase controls (only shown in sim mode) -->
+      <div id="phase-controls" style="display:flex;gap:6px;align-items:center;">
+        <button class="phase-btn start" id="btn-start" onclick="triggerPhase('entry')" disabled>
+          <span class="dot"></span>START EVENT
+        </button>
+        <button class="phase-btn end" id="btn-end" onclick="triggerPhase('buildup')" disabled>
+          <span class="dot"></span>END ENTRY
+        </button>
+        <button class="phase-btn evac" id="btn-evac" onclick="triggerPhase('evac')" disabled>
+          <span class="dot"></span>EVACUATE
+        </button>
+        <button class="phase-btn chaos" id="btn-chaos" onclick="triggerPhase('chaos')">
+          <span class="dot"></span>CHAOS START
+        </button>
+        <button class="phase-btn" id="btn-end-evac" onclick="endEvacuation()" disabled
+          style="background:rgba(168,85,247,0.12);border-color:rgba(168,85,247,0.5);color:#a855f7;">
+          <span class="dot" style="background:#a855f7"></span>END EVACUATION
+        </button>
+      </div>
+      <div class="tb-right">
+        <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light / dark mode">
+          <span class="tt-icon" id="theme-icon">🌙</span>
+          <span id="theme-label">Light</span>
+        </button>
+        <div id="phase-indicator" class="ph-idle">IDLE</div>
+        <span id="venue-import-badge"></span>
+        <button class="sm-btn" onclick="openVenueModal()" style="width:auto;margin:0;padding:5px 11px;"
+          onmouseover="this.style.borderColor='var(--orange)';this.style.color='var(--orange)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--dim)'" title="Open Venue Setup">🗺
+          Venue Setup</button>
+        <button class="sm-btn accent" onclick="exportData()" style="width:auto;margin:0;padding:5px 12px">⬇
+          Export</button>
+      </div>
     </div>
 
-    <!-- Map Modal Overlay -->
-    <div id="mapModal" class="map-modal hidden">
-        <div class="map-modal-content">
-            <div class="map-header">
-                <h2>Venue Map Importer</h2>
-                <button id="btnCloseMap" class="btn-close">&times;</button>
+    <!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+    <div id="main">
+
+      <!-- ─── SIDEBAR ─── -->
+      <div id="sidebar">
+
+        <!-- Edit mode sidebar -->
+        <div id="sb-edit">
+
+          <div class="sb-section">
+            <div class="sb-title">// Tools</div>
+            <div class="tool-grid">
+              <button class="tool-btn t-select active" id="tool-select" onclick="setTool('select')"
+                title="Select & move">
+                <span class="icon">↖</span>Select
+              </button>
+              <button class="tool-btn t-entry" id="tool-entry" onclick="setTool('entry')" title="Place entry point">
+                <span class="icon">🟢</span>Entry
+              </button>
+              <button class="tool-btn t-exit" id="tool-exit" onclick="setTool('exit')" title="Place exit point">
+                <span class="icon">🔵</span>Exit
+              </button>
+              <button class="tool-btn t-zone" id="tool-zone" onclick="setTool('zone')" title="Draw zone">
+                <span class="icon">🟣</span>Zone
+              </button>
+              <button class="tool-btn t-obs" id="tool-obstacle" onclick="setTool('obstacle')" title="Draw obstacle">
+                <span class="icon">🔴</span>Obstacle
+              </button>
+              <button class="tool-btn t-barricade" id="tool-barricade" onclick="setTool('barricade')" title="Draw breakable barricade">
+                <span class="icon">🧱</span>Barricade
+              </button>
+              <button class="tool-btn t-bound" id="tool-boundary" onclick="setTool('boundary')"
+                title="Draw boundary polygon">
+                <span class="icon">🟠</span>Boundary
+              </button>
+              <button class="tool-btn t-chaos" id="tool-chaos" onclick="setTool('chaos')" title="Place source of chaos">
+                <span class="icon">💀</span>Chaos
+              </button>
+              <button class="tool-btn t-delete" id="tool-delete" onclick="setTool('delete')" title="Delete element">
+                <span class="icon">🗑</span>Delete
+              </button>
+              <button class="tool-btn" onclick="clearAll()" title="Clear map" style="--col:var(--dim)">
+                <span class="icon">⊘</span>Clear
+              </button>
             </div>
-            <div class="map-search-bar">
-                <input type="text" id="mapSearchInput" placeholder="Search city or venue...">
-                <button id="btnMapSearch" class="btn btn-secondary">Search</button>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Floorplan</div>
+            <div class="upload-area" onclick="document.getElementById('fp-upload').click()">
+              📂 Upload PNG / JPG<br><small>Background floorplan</small>
             </div>
-            <div id="osm-map" class="osm-map-container"></div>
-            <div class="map-footer">
-                <p class="helper-text">Click on the map to drop pins defining the venue boundary.</p>
-                <div class="button-group">
-                    <button id="btnClearMap" class="btn btn-danger">Clear Pins</button>
-                    <button id="btnImportBoundary" class="btn btn-primary">Import to Canvas</button>
-                </div>
+            <input type="file" id="fp-upload" accept="image/*" style="display:none" onchange="loadFloorplan(this)">
+            <button class="sm-btn danger" onclick="clearFloorplan()" style="margin-top:5px">Remove floorplan</button>
+          </div>
+
+          <!-- Properties of selected element -->
+          <div id="props-panel">
+            <div class="sb-title">// Properties</div>
+            <div id="props-content">
+              <p class="no-selection">Nothing selected</p>
             </div>
+          </div>
+
+          <!-- Element list -->
+          <div class="sb-section">
+            <div class="sb-title">// Elements <span id="elem-count" style="color:var(--accent)">(0)</span></div>
+            <div id="elem-list" class="elem-list"></div>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Map</div>
+            <div style="display:flex;gap:4px;margin-bottom:6px">
+              <select id="map-preset-select" class="prop-input" style="flex:1;font-size:0.6rem;padding:4px 6px">
+                <option value="outdoor-festival">🎪 Outdoor Festival</option>
+                <option value="indoor-stadium">🏟️ Indoor Stadium</option>
+                <option value="conference-center">🏢 Conference Center</option>
+                <option value="shopping-mall">🛍️ Shopping Mall</option>
+                <option value="park-event">🌳 Park Event</option>
+                <option value="prayagraj-sangam">📿 Prayagraj Sangam</option>
+              </select>
+              <button class="sm-btn accent" style="width:auto;margin:0;padding:4px 10px" onclick="loadMapPreset(document.getElementById('map-preset-select').value)">Load</button>
+            </div>
+            <button class="sm-btn" onclick="saveMapToJSON()">💾 Save Map</button>
+            <button class="sm-btn" onclick="document.getElementById('map-upload').click()">📂 Load Map File</button>
+            <input type="file" id="map-upload" accept=".json" style="display:none" onchange="loadMapFromFile(this)">
+          </div>
         </div>
-    </div>
 
-    <script src="script.js"></script>
+        <!-- Simulation mode sidebar -->
+        <div id="sb-sim" style="display:none">
+
+          <!-- HOW IT WORKS GUIDE -->
+          <div class="sb-section" id="how-it-works"
+            style="background:rgba(59,130,246,0.06);border-bottom:1px solid rgba(59,130,246,0.2)">
+            <div class="sb-title" style="color:var(--accent)">// How Agents Spawn</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim);line-height:1.7">
+              <div style="margin-bottom:4px"><span style="color:var(--green)">①</span> Place <b
+                  style="color:var(--text)">Entry points</b> on the map</div>
+              <div style="margin-bottom:4px"><span style="color:var(--yellow)">②</span> Press <b
+                  style="color:var(--text)">START EVENT</b> above</div>
+              <div style="margin-bottom:4px"><span style="color:var(--accent)">③</span> Agents stream in from each entry
+                at its spawn rate (people/min)</div>
+              <div><span style="color:var(--orange)">④</span> Or use <b style="color:var(--text)">Drop Crowd</b> below
+                to add instantly</div>
+            </div>
+            <button class="sm-btn" onclick="document.getElementById('how-it-works').style.display='none'"
+              style="margin-top:6px;font-size:0.55rem">Got it — hide this</button>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Status</div>
+            <div class="stat-grid">
+              <div class="stat-card" id="sc-agents"><span class="sv" id="sv-agents">0</span><span class="sl">People
+                  Inside Venue </span></div>
+              <div class="stat-card safe" id="sc-evac"><span class="sv" id="sv-evac">0</span><span
+                  class="sl">Evacuated</span></div>
+              <div class="stat-card warn" id="sc-density"><span class="sv" id="sv-density">0</span><span class="sl">Peak
+                  /m²</span></div>
+              <div class="stat-card" id="sc-time"><span class="sv" id="sv-time">0s</span><span class="sl">Elapsed</span>
+              </div>
+            </div>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim)">Total spawned</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent)" id="sv-total">0</span>
+            </div>
+            <div style="margin-top:5px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim)"
+                title="Venue boundary area in world units">Venue area</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim)" id="sv-venue-area">—
+                m²</span>
+            </div>
+
+            <div class="progress-bar" style="margin-top:5px">
+              <div class="progress-fill" id="evac-progress" style="width:0%"></div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim);margin-top:3px" id="evac-pct">
+              0% evacuated</div>
+          </div>
+
+          <!-- SPAWN CONTROLS -->
+          <div class="sb-section">
+            <div class="sb-title">// Spawn Controls</div>
+            <div id="spawn-phase-hint"
+              style="font-family:'DM Mono',monospace;font-size:0.6rem;padding:6px 8px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--dim);margin-bottom:8px">
+              Press <span style="color:var(--green)">START EVENT</span> to begin spawning
+            </div>
+            <div id="entry-spawn-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+            <div class="prop-row" style="margin-bottom:6px">
+              <div class="prop-label" style="display:flex;justify-content:space-between">
+                Global Rate Multiplier <span id="spawn-mult-val" style="color:var(--text)">1.0×</span>
+              </div>
+              <input type="range" min="0.1" max="5" step="0.1" value="1" class="prop-input" style="padding:2px"
+                oninput="SPAWN_MULT=parseFloat(this.value);document.getElementById('spawn-mult-val').textContent=parseFloat(this.value).toFixed(1)+'×'">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+              <button class="sm-btn" onclick="dropCrowd(50)"
+                style="margin:0;border-color:var(--green);color:var(--green)"
+                title="Instantly add 50 agents spread across all entry points">
+                + Drop 50
+              </button>
+              <button class="sm-btn" onclick="dropCrowd(200)"
+                style="margin:0;border-color:var(--orange);color:var(--orange)" title="Instantly add 200 agents">
+                + Drop 200
+              </button>
+            </div>
+            <button class="sm-btn" onclick="dropCrowd(500)"
+              style="border-color:var(--red);color:var(--red);margin-top:5px"
+              title="Simulate a rush — 500 agents at once">
+              ⚡ Rush 500 agents
+            </button>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Simulation</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+              <button class="sm-btn accent" id="btn-play-pause" onclick="togglePause()" style="margin:0">⏸
+                Pause</button>
+              <button class="sm-btn danger" onclick="resetSim()" style="margin:0">↺ Reset</button>
+            </div>
+            <div style="margin-top:10px">
+              <div class="prop-row">
+                <div class="prop-label">Sim Speed</div>
+                <input type="range" min="0.5" max="4" step="0.5" value="1" id="sim-speed" class="prop-input"
+                  style="padding:2px"
+                  oninput="SIM_SPEED=parseFloat(this.value);document.getElementById('sim-speed-val').textContent=this.value+'x'">
+                <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim)"
+                  id="sim-speed-val">1x</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Agent Legend</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--dim)">
+                <div style="width:10px;height:10px;border-radius:50%;background:#3b82f6;flex-shrink:0"></div>
+                Entering — heading to zone
+              </div>
+              <div
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--dim)">
+                <div style="width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0"></div>
+                Gathered — inside zone
+              </div>
+              <div
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--dim)">
+                <div style="width:10px;height:10px;border-radius:50%;background:#f97316;flex-shrink:0"></div>
+                Evacuating — calm
+              </div>
+              <div
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--dim)">
+                <div style="width:10px;height:10px;border-radius:50%;background:#ef4444;flex-shrink:0"></div>
+                Evacuating — panicked
+              </div>
+              <div
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--dim)">
+                <div style="width:10px;height:10px;border-radius:50%;background:#ffffff;flex-shrink:0"></div>
+                Source of chaos
+              </div>
+              <div
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--dim)">
+                <div style="width:10px;height:10px;border-radius:2px;background:#f59e0b;flex-shrink:0;border:1px dashed rgba(245,158,11,0.6)"></div>
+                Breakable barricade
+              </div>
+            </div>
+            <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
+              <div class="sb-title" style="margin-bottom:5px">// Density Scale</div>
+              <div
+                style="display:flex;gap:3px;align-items:center;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--dim)">
+                <div style="width:14px;height:8px;border-radius:2px;background:#22c55e"></div>Safe &lt;2
+                <div style="width:14px;height:8px;border-radius:2px;background:#eab308;margin-left:4px"></div>2–5
+                <div style="width:14px;height:8px;border-radius:2px;background:#ef4444;margin-left:4px"></div>&gt;5 /m²
+              </div>
+            </div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--dim)">FPS</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent)"
+                id="fps-counter">—</span>
+            </div>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Capture View</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--dim);margin-bottom:6px;line-height:1.4">
+              Select modes to snapshot. These will be captured automatically when evacuation starts. No live overlays are shown to prevent clutter.
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <label
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--dim);cursor:pointer">
+                <input type="checkbox" id="cap-heat" checked onchange="CAPTURE_HEAT=this.checked"> Capture Density heatmap
+              </label>
+              <label
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--dim);cursor:pointer">
+                <input type="checkbox" id="cap-vel" checked onchange="CAPTURE_VEL=this.checked"> Capture Velocity vectors
+              </label>
+              <label
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--dim);cursor:pointer">
+                <input type="checkbox" id="cap-trail" checked onchange="CAPTURE_TRAIL=this.checked"> Capture Movement trails
+              </label>
+              <label
+                style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--dim);cursor:pointer">
+                <input type="checkbox" id="cap-danger" checked onchange="CAPTURE_DANGER=this.checked"> Capture Danger zones
+              </label>
+            </div>
+            <button class="sm-btn accent" id="btn-view-snapshots" onclick="showSnapshotModal()" style="display:none;margin-top:10px">
+              🖼 View Telemetry Snapshots
+            </button>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Warnings</div>
+            <div id="warnings-list">
+              <p class="no-selection">No warnings</p>
+            </div>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Event Timeline <span id="timeline-count" style="color:var(--accent)">(0)</span></div>
+            <div id="timeline-list" style="max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent">
+              <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--dim);font-style:italic;padding:4px 0">No events yet. Start the simulation.</div>
+            </div>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-title">// Export</div>
+            <button class="sm-btn" onclick="exportCSV()">📊 Export CSV</button>
+            <button class="sm-btn" onclick="exportJSON()">📋 Export JSON</button>
+          </div>
+        </div>
+
+      </div><!-- /sidebar -->
+
+      <!-- ─── CANVAS ─── -->
+      <div id="canvas-wrap">
+        <canvas id="canvas-bg"></canvas>
+        <canvas id="canvas-map"></canvas>
+        <canvas id="canvas-agents"></canvas>
+        <canvas id="canvas-ui"></canvas>
+        <div id="zoom-info">100%</div>
+        <div id="coord-info">x:0 y:0</div>
+        <div id="tooltip"></div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+     VENUE SETUP MODAL
+     Powered by venue.js — bridge between map tool and simulator
+     ═══════════════════════════════════════════════════════════ -->
+  <div id="venue-modal-overlay">
+    <div id="venue-modal">
+
+      <!-- Header -->
+      <div class="vm-header">
+        <div>
+          <h2>🗺 Venue Setup</h2>
+          <p>Search your venue on the map, draw its boundary, place gates — then import to the simulator.</p>
+        </div>
+        <div class="vm-tabs">
+          <button class="vm-tab active" id="vtab-map" onclick="venueSwitchTab('map')">🛰 Map Search</button>
+          <button class="vm-tab" id="vtab-upload" onclick="venueSwitchTab('upload')">📐 Upload Layout</button>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="vm-body">
+
+        <!-- ── MAP TAB ── -->
+        <div id="venue-map-panel">
+          <div id="venue-map"></div>
+
+          <div id="venue-map-sidebar">
+
+            <!-- Search -->
+            <div style="position:relative">
+              <div class="vm-sb-title">🔍 Find Venue</div>
+              <div class="vm-search-row">
+                <input type="text" id="venue-search-input" class="vm-search-input"
+                  placeholder="e.g. Ramlila Maidan Delhi" autocomplete="off" />
+                <button class="vm-search-btn" onclick="venueUseCurrentLocation()" title="Use Current Location"
+                  style="background:var(--surface); border:1px solid var(--border); color:var(--accent); font-size:1rem; padding:0 8px; flex-shrink:0;">📍</button>
+              </div>
+              <div id="venue-search-suggestions" class="vm-suggestions"></div>
+              <button class="vm-search-btn" onclick="venueSearch()"
+                style="width:100%; margin-top:5px; border-radius:4px; padding:6px 0; font-size:0.72rem; letter-spacing:0.1em;">
+                🔎 Search
+              </button>
+              <div id="venue-search-result"
+                style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--dim);margin-top:5px;min-height:14px">
+              </div>
+            </div>
+
+            <!-- Tools -->
+            <div>
+              <div class="vm-sb-title">📐 Draw Tools</div>
+              <div class="vm-tool-grid">
+                <button class="vm-tool-btn" id="vmtool-boundary" onclick="venueActivateBoundary()">
+                  <i>⬡</i>Boundary
+                </button>
+                <button class="vm-tool-btn" id="vmtool-entry" onclick="venueAddGateMode('entry')">
+                  <i style="color:var(--green)">▶</i>Entry Gate
+                </button>
+                <button class="vm-tool-btn" id="vmtool-exit" onclick="venueAddGateMode('exit')">
+                  <i style="color:var(--accent)">■</i>Exit Gate
+                </button>
+                <button class="vm-tool-btn" onclick="venueClearAll()">
+                  <i style="color:var(--dim)">✕</i>Clear All
+                </button>
+              </div>
+              <div
+                style="font-family:'DM Mono',monospace;font-size:0.57rem;color:var(--dim);margin-top:8px;line-height:1.65">
+                💡 Draw boundary polygon → double-click to close.<br>
+                Then click to place entry &amp; exit gates.
+              </div>
+            </div>
+
+            <!-- Venue info (shown after boundary is drawn) -->
+            <div id="venue-area-row" style="display:none">
+              <div class="vm-sb-title">📊 Venue Info</div>
+              <div class="vm-info-box" style="margin-bottom:5px">
+                <div class="vm-info-label">Estimated Area</div>
+                <div class="vm-info-val" id="venue-area-val">—</div>
+              </div>
+              <div class="vm-info-box">
+                <div class="vm-info-label">Bounding Box</div>
+                <div class="vm-info-val" id="venue-bbox-val">—</div>
+              </div>
+            </div>
+
+            <!-- Gate list -->
+            <div>
+              <div class="vm-sb-title">🚪 Gates <span id="venue-gate-count">(0)</span></div>
+              <div id="venue-gate-list" style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim);font-style:italic">No
+                  gates placed yet.</div>
+              </div>
+            </div>
+
+          </div><!-- /venue-map-sidebar -->
+        </div><!-- /venue-map-panel -->
+
+        <!-- ── UPLOAD TAB ── -->
+        <div id="venue-upload-panel">
+          <div class="vm-upload-zone" onclick="document.getElementById('venue-layout-file').click()">
+            <span class="vm-up-icon">🖼</span>
+            <div class="vm-up-title">Upload Venue Layout Image</div>
+            <div class="vm-up-sub">PNG, JPG or SVG — loaded as floorplan overlay in the editor</div>
+            <input type="file" id="venue-layout-file" accept=".png,.jpg,.jpeg,.svg" style="display:none"
+              onchange="venueHandleUpload(event)" />
+          </div>
+
+          <div id="venue-upload-preview" style="display:none;text-align:center">
+            <img id="venue-preview-img"
+              style="max-width:380px;max-height:260px;border:1px solid var(--border);border-radius:6px;opacity:0.85" />
+            <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--green);margin-top:8px">
+              ✓ Ready — will be loaded as floorplan overlay in the editor
+            </div>
+          </div>
+
+          <div
+            style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim);text-align:center;max-width:380px;line-height:1.75">
+            After importing you can scale &amp; position the image in the Map Editor,<br>
+            then trace the boundary and place your entries and exits on top.
+          </div>
+        </div>
+
+      </div><!-- /vm-body -->
+
+      <!-- Footer -->
+      <div class="vm-footer">
+        <div class="vm-footer-status" id="venue-status">
+          Search for your venue, draw a boundary polygon, then place gates.
+        </div>
+        <button class="vm-btn secondary" onclick="closeVenueModal()">Close</button>
+        <button class="vm-btn primary" id="venue-import-btn" onclick="importVenueToSim()" disabled>
+          Import to Editor →
+        </button>
+      </div>
+
+    </div><!-- /venue-modal -->
+  </div><!-- /venue-modal-overlay -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+     TELEMETRY SNAPSHOT MODAL
+     ═══════════════════════════════════════════════════════════ -->
+  <div id="snapshot-modal-overlay">
+    <div id="snapshot-modal">
+      <div class="sm-header">
+        <div>
+          <h2>Real-Time Telemetry & Visualization Layers</h2>
+        </div>
+        <button class="sm-close-btn" onclick="closeSnapshotModal()">✕</button>
+      </div>
+      <div class="sm-body">
+        <div class="sm-grid">
+          <!-- Heatmap -->
+          <div class="sm-panel">
+            <div class="sm-panel-header">
+              <div class="sm-panel-title">Density Heatmap</div>
+              <p>Color-coded overlay identifying mass concentration (Green → Yellow → Red).</p>
+            </div>
+            <div class="sm-panel-content">
+              <img id="snap-img-heat" src="" alt="Heatmap not captured" />
+              <div class="sm-panel-overlay no-image">Not Captured</div>
+            </div>
+            <div class="sm-panel-footer">
+              <button class="sm-btn" onclick="downloadSnapshot('heat')">📥 Download Image</button>
+            </div>
+          </div>
+          <!-- Velocity -->
+          <div class="sm-panel">
+            <div class="sm-panel-header">
+              <div class="sm-panel-title">Velocity Vectors</div>
+              <p>Individual directional arrows mapping the immediate trajectory of every agent.</p>
+            </div>
+            <div class="sm-panel-content">
+              <img id="snap-img-vel" src="" alt="Velocity not captured" />
+              <div class="sm-panel-overlay no-image">Not Captured</div>
+            </div>
+            <div class="sm-panel-footer">
+               <button class="sm-btn" onclick="downloadSnapshot('vel')">📥 Download Image</button>
+            </div>
+          </div>
+          <!-- Trails -->
+          <div class="sm-panel">
+            <div class="sm-panel-header">
+              <div class="sm-panel-title">Movement Trails</div>
+              <p>Tracing recent path history to reveal hidden desire paths and structural flow flaws.</p>
+            </div>
+            <div class="sm-panel-content">
+              <img id="snap-img-trail" src="" alt="Trails not captured" />
+              <div class="sm-panel-overlay no-image">Not Captured</div>
+            </div>
+            <div class="sm-panel-footer">
+               <button class="sm-btn" onclick="downloadSnapshot('trail')">📥 Download Image</button>
+            </div>
+          </div>
+          <!-- Danger -->
+          <div class="sm-panel">
+            <div class="sm-panel-header">
+              <div class="sm-panel-title">Danger Zone Detection</div>
+              <p>System continuously scans the density grid, clustering cells into human-readable warnings.</p>
+            </div>
+            <div class="sm-panel-content">
+              <img id="snap-img-danger" src="" alt="Danger Zones not captured" />
+              <div class="sm-panel-overlay no-image">Not Captured</div>
+            </div>
+            <div class="sm-panel-footer">
+              <button class="sm-btn" onclick="downloadSnapshot('danger')">📥 Download Image</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── App Scripts ─── -->
+  <script src="js/state.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/flowfield.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/simulation.js"></script>
+  <script src="js/timeline.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/simrender.js"></script>
+  <script src="js/floorplan.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/ui_snapshots.js"></script>
+
+  <!-- ─── Leaflet (for Venue Setup modal) ─── -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="js/venue.js"></script>
+
 </body>
+
+<script>
+  // ── Theme toggle ─────────────────────────────────────────────
+  (function () {
+    // Restore saved preference on load
+    const saved = localStorage.getItem('cg-theme') || 'dark';
+    if (saved === 'light') applyLight();
+
+    function applyLight() {
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.getElementById('theme-icon').textContent  = '☀️';
+      document.getElementById('theme-label').textContent = 'Dark';
+    }
+    function applyDark() {
+      document.documentElement.removeAttribute('data-theme');
+      document.getElementById('theme-icon').textContent  = '🌙';
+      document.getElementById('theme-label').textContent = 'Light';
+    }
+
+    window.toggleTheme = function () {
+      const isLight = document.documentElement.hasAttribute('data-theme');
+      if (isLight) { applyDark();  localStorage.setItem('cg-theme', 'dark'); }
+      else          { applyLight(); localStorage.setItem('cg-theme', 'light'); }
+    };
+  })();
+</script>
 
 </html>

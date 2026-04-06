@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdGuard: AI Crowd Management Simulation</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon"></div>
+                <h1>CrowdGuard</h1>
+            </div>
+            <p class="brand-subtitle">AI-Driven Crowd Management</p>
+            
+            <div class="control-panel">
+                <section class="panel-section">
+                    <h3>Simulation Transport</h3>
+                    <div class="button-group">
+                        <button id="btnPlay" class="btn btn-primary active">Play</button>
+                        <button id="btnPause" class="btn btn-secondary">Pause</button>
+                    </div>
+                    <button id="btnClear" class="btn btn-danger fluid mt-2">Clear Agents</button>
+                </section>
+
+                <section class="panel-section border-top">
+                    <h3>Environment Toolkit</h3>
+                    <div class="tool-grid">
+                        <button id="toolSpawn" class="btn tool active" data-tool="spawn">Spawn Area</button>
+                        <button id="toolEntry" class="btn tool" data-tool="entry">Entry Gate</button>
+                        <button id="toolExit" class="btn tool" data-tool="exit">Exit Point</button>
+                        <button id="toolWall" class="btn tool" data-tool="wall">Build Wall</button>
+                        <button id="toolSquare" class="btn tool" data-tool="square">Build Square</button>
+                        <button id="toolShop" class="btn tool" data-tool="shop">Build Shop</button>
+                        <button id="toolStage" class="btn tool" data-tool="stage">Build Stage</button>
+                        <button id="toolWashroom" class="btn tool" data-tool="washroom">Washroom</button>
+                        <button id="toolRemove" class="btn tool" data-tool="remove">Remove</button>
+                    </div>
+                    <p class="helper-text mt-2" id="helperText">Click and drag on the canvas to add a spawn zone.</p>
+                </section>
+
+                <section class="panel-section border-top">
+                    <h3>Global Settings</h3>
+                    <div class="slider-group">
+                        <label for="speedSlider">Agent Max Speed <span class="value" id="speedVal">2.5</span></label>
+                        <input type="range" id="speedSlider" min="1" max="5" value="2.5" step="0.1">
+                    </div>
+                    <div class="slider-group">
+                        <label for="panicSlider">Panic Inducement <span class="value" id="panicVal">0%</span></label>
+                        <input type="range" id="panicSlider" min="0" max="100" value="0">
+                    </div>
+                    <div class="toggle-group mt-2">
+                        <label class="switch">
+                            <input type="checkbox" id="heatmapToggle">
+                            <span class="slider round"></span>
+                        </label>
+                        <span>Show Density Heatmap</span>
+                    </div>
+                </section>
+            </div>
+
+            <div class="stats-panel">
+                <h3>Telemetry</h3>
+                <div class="stat-card">
+                    <div class="stat-label">Active Agents</div>
+                    <div class="stat-value" id="statActive">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Evacuated</div>
+                    <div class="stat-value text-success" id="statEvacuated">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Stampede Risk</div>
+                    <div class="stat-value text-safe" id="statRisk">LOW</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="canvas-container">
+            <canvas id="simCanvas"></canvas>
+            <!-- Overlay for notifications -->
+            <div id="notification-area"></div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
